@@ -103,15 +103,12 @@ app.get('/geturl', (req, res) => {
         if (foundDocument) {
             console.log('Document found:', foundDocument);
             console.log('String:', foundDocument.value); // Access the string
-            url = foundDocument[0].url;
+            url = foundDocument[foundDocument.length-1].url;
             res.send({ "url": url });
         } else {
             console.log('No document found');
             res.send({ "url": "404 error" });
         }
-
-        // Optionally, close the connection when done
-        mongoose.connection.close();
     });
 });
 
