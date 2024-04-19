@@ -30,6 +30,18 @@ db.once('open', ()=>{
 const imageSchema = new mongoose.Schema({
   imageData: String
 });
+
+const Schema = mongoose.Schema;
+
+const RedirURL = new Schema({
+    url: {
+        type: String,
+        required: true, // Optional: to make this property required
+    },
+});
+
+const Redi_url = mongoose.model('RedirURL', RedirURL);
+
 const Image = mongoose.model('Image', imageSchema);
 
 // Middleware
@@ -44,7 +56,7 @@ app.post('/api/save-image', async (req, res) => {
   try {
     const imageData = req.body.imageData;
     images.push({"image":imageData});
-    const newImage = new Image({ imageData });
+    const newImage = new Image({ imageData });  
     await newImage.save();
     res.status(201).json({ message: 'Image data saved successfully.' });
   } catch (error) {
@@ -54,17 +66,57 @@ app.post('/api/save-image', async (req, res) => {
 });
 
 app.get('/getimage', (req, res)=>{
-    res.send(images);
+    Image.findOne({}, (err, foundDocument) => {
+        if (err) {
+            console.error('Error finding document:', err);
+        } else {
+            if (foundDocument) {
+                console.log('Document found:', foundDocument);
+                console.log('String:', foundDocument.value); // Access the string
+                url = foundDocument;
+                res.send(foundDocument);
+            } else {
+                console.log('No document found');
+                res.send({"url": "404 error"});
+            }
+        }
+        // Optionally, close the connection when done
+        mongoose.connection.close();
+    });
 });
 
-app.post('/seturl', (req,res)=>{
+app.post('/seturl', async (req,res)=>{
     url = req.body.url;
+    const redirURL = new Redi_url({
+        url: url,
+    });
+
+    await redirURL.save();
+
     console.log("URL set successfully");
     res.send({"msg":"URL set successfully"});
 });
 
-app.get('/geturl', (req,res)=>{
-    res.send({"url": url});
+app.get('/geturl', (req,res)=>{ 
+    Redi_url.findOne({}, (err, foundDocument) => {
+        if (err) {
+            console.error('Error finding document:', err);
+        } else {
+            if (foundDocument) {
+                console.log('Document found:', foundDocument);
+                console.log('String:', foundDocument.value); // Access the string
+                url = foundDocument;
+                res.send({"url": url});
+            } else {
+                console.log('No document found');
+                res.send({"url": "404 error"});
+            }
+        }
+        // Optionally, close the connection when done
+        mongoose.connection.close();
+    });
+
+    // res.send({"url": url});
 });
 
 // Start the server
