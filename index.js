@@ -66,23 +66,16 @@ app.post('/api/save-image', async (req, res) => {
 });
 
 app.get('/getimage', (req, res) => {
-    Image.findOne({}, (err, foundDocument) => {
-        if (err) {
-            console.error('Error finding document:', err);
+    Image.find().then((foundDocument) => {
+
+        if (foundDocument) {
+            res.send(foundDocument);
         } else {
-            if (foundDocument) {
-                console.log('Document found:', foundDocument);
-                console.log('String:', foundDocument.value); // Access the string
-                url = foundDocument;
-                res.send(foundDocument);
-            } else {
-                console.log('No document found');
-                res.send({ "url": "404 error" });
-            }
+            console.log('No document found');
+            res.send({ "url": "404 error" });
         }
-        // Optionally, close the connection when done
-        mongoose.connection.close();
     });
+    
 });
 
 app.post('/seturl', async (req, res) => {
